@@ -46,7 +46,7 @@ print(satellite)
 # Path_Liv = '/Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data'
 # Path_Louis = r'C:\Users\louis\Downloads\EP_Project\Data' 
 
-## Task 4   
+## Task 4 en Task 5
 
 folders = list(satellite["filename"])
 print(folders)
@@ -78,7 +78,8 @@ def CalcRaster(A_p, C_p, Param, currentdir, folder, tif, date, Display=False):
     
     RasterData = np.zeros(np.shape(rho_w))
     RasterData = A_p*rho_w/(1-rho_w/C_p)
-        
+    
+    #nu data opslaan
     out_meta = band_meta.copy()
 
     out_meta.update({'driver':'GTiff',
