@@ -6,39 +6,38 @@ Created on Tue Dec 12 10:53:46 2023
 """
 ## Task 2 
 
-#eerst importeren
+# first import libraries
 import pathlib
 import pandas as pd
 import zipfile
-#lijst van subfolders (1ste kolom van de dataframe)
+# list of subfolders (1ste column of the dataframe)
 import os
 import numpy as np
 import rasterio
 import matplotlib.pyplot as plt
 
-#dataframe maken
-satellite = pd.DataFrame() #momenteel leeg
-# currentdir = input('What is the path of your data on your computer?\n')
-currentdir = '/Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data'
+# make dataframe 
+satellite = pd.DataFrame() #currently empty
+currentdir = input('What is the path of your data on your computer?\n')  # interacting with user
 
 items_dir = []
-items = os.listdir(currentdir) #code gaat binnen current directory/folder op zoek naar alle andere directories
+items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
 for item in items:
-    if item[-4:]=='.zip':
+    if item[-4:]=='.zip':      # code to unzip zipfiles if present
         
         path = os.path.join(currentdir, item)
         with zipfile.ZipFile(path,"r") as zip_ref:
             zip_ref.extractall(currentdir)
         os.remove(path)
-    if (os.path.isdir(os.path.join(currentdir, item)) & (item[:2]=='S2')): #je moet currentdir joinen met item naam want anders gaat code zeggen: dit is geen directory
-        # print(item) #enkel naam van de folder printen en niet heel de path (dus met currentdir)
+    if (os.path.isdir(os.path.join(currentdir, item)) & (item[:2]=='S2')): #only look for folders with filename that start with 'S2'
+        # print(item) #only print name not entire path 
         items_dir.append(item)
     
-#list van filenames in dataframe zetten
+# put list of filenames in dataframe 
 satellite = pd.DataFrame({"filename": (items_dir)})
 
 
-#datum extracten uit filename (2de kolom dataframe)
+# extract date from filename (2nd colomn dataframe)
 satellite["date"]=satellite["filename"].str[11:19]
 
 print(satellite)
@@ -46,43 +45,41 @@ print(satellite)
 # Path_Liv = '/Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data'
 # Path_Louis = r'C:\Users\louis\Downloads\EP_Project\Data' 
 
-## Task 4 en Task 5
+## Task 4 and Task 5
 
 folders = list(satellite["filename"])
 print(folders)
 
-#band08 zoeken in de dataframe
+# look for band08 in the dataframe
 def find_band08(folder):
-    path = os.path.join(currentdir,folder)
+    path = os.path.join(currentdir,folder) # path of folder on computer
     folder_path = pathlib.Path(path)
-    tif_files = (list(folder_path.rglob("*.tif"))) # regular expression: alles dat eindigt op .tif
+    tif_files = (list(folder_path.rglob("*.tif"))) # regular expression: all files ending with .tif
     for tif in tif_files:
-        if 'B08' in str(tif):
+        if 'B08' in str(tif): # search files that contain 'B08' in their filename
             return tif
 
-#Calculating TUR en SPM
+# Calculating TUR and SPM
 def CalcRaster(A_p, C_p, Param, currentdir, folder, tif, date, Display=False):
     with rasterio.open(tif) as rho:
 
-        # Get metadata for the band
-        band_meta = rho.meta
-        band_data = rho.read()[0]
+        rho_w = rho.read()[0]
 
-        # Display a simple plot of the band
+        # Display a simple plot of the band if you put Display=True as input to this function
         if(Display):
-            plt.imshow(band_data, cmap='gray')
+            plt.imshow(rho_w)
             plt.title("Band08")
             plt.show()
 
-        rho_w = band_data # np.array(band_data)
     
-    RasterData = np.zeros(np.shape(rho_w))
-    RasterData = A_p*rho_w/(1-rho_w/C_p)
+    RasterData = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
+    RasterData = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
     
-    #nu data opslaan
-    out_meta = band_meta.copy()
-
-    out_meta.update({'driver':'GTiff',
+    # now save data
+    
+    band_meta = rho.meta  # Get metadata for the band
+    out_meta = band_meta.copy() # copy structure of meta_data 
+    out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
                      'width':rho.shape[1],
                      'height':rho.shape[0],
                      'count':1,
@@ -91,33 +88,33 @@ def CalcRaster(A_p, C_p, Param, currentdir, folder, tif, date, Display=False):
                      'transform':rho.transform,
                      'nodata':0})
     
-    path = currentdir + '/'+Param+'/'+Param+'_' + date +'.tif'
-    with rasterio.open(fp=path, #outputpath_name
+    path_out = currentdir + '/'+Param+'/'+Param+'_' + date +'.tif' # path of where you want to save raster data
+    with rasterio.open(fp=path_out, # outputpath_name
                   mode='w',**out_meta) as dst:
                   dst.write(RasterData, 1)
 
-    return RasterData
+    return RasterData #output of function
 
-#maak folders voor raster lagen in op te slaan
+# make the folders where RasterData is saved, if not created already (Task 5)
 def CreateFolder(currentdir, Param):
-    path = os.path.join(currentdir,Param)
-    if not os.path.exists(path):
-        os.makedirs(path) 
+    path_create = os.path.join(currentdir,Param)
+    if not os.path.exists(path_create):
+        os.makedirs(path_create) 
     
 CreateFolder(currentdir, 'TUR')
 CreateFolder(currentdir, 'SPM')
 CreateFolder(currentdir, 'CHL')
 
 for folder in folders:
-    #bereken TUR:
+    # bereken TUR:
     A_p = 1602.93
     C_p = 0.19130
     Param = 'TUR'
-    tif = find_band08(folder)
-    date = list(satellite.loc[satellite.filename == folder, 'date'])
-    TUR_data = CalcRaster(A_p, C_p, Param, currentdir, folder, tif, date[0])
+    tif = find_band08(folder) # get the right.tif file
+    date = list(satellite.loc[satellite.filename == folder, 'date']) # find date of folder
+    TUR_data = CalcRaster(A_p, C_p, Param, currentdir, folder, tif, date[0],True) # calculate and save TUR data
 
-    #bereken nu  SPM:
+    # bereken nu  SPM:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
