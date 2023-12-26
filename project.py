@@ -87,7 +87,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         out_meta.update({"driver": "GTiff", "height": clipped_data.shape[1], "width": clipped_data.shape[2],
                  "transform": out_transform})
 
-        # Write the clipped data to a new GeoTIFF file
+        # # Write the clipped data to a new GeoTIFF file
         # with rasterio.open(output_path, 'w', **meta) as dst:
         #     dst.write(clipped_R08)
 
