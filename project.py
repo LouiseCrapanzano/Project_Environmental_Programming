@@ -78,14 +78,6 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         # Ensure the geometry is a valid GeoJSON-like geometry
         if not geometry[0].is_valid:
             geometry[0] = geometry[0].buffer(0)
-
-        # Print reprojected shapefile and raster extents
-        print("Reprojected Shapefile Extent:", reprojected_shapefile.total_bounds)
-        print("Raster Extent:", rho.bounds)
-    
-        # Print reprojected shapefile and raster CRS
-        print("Reprojected Shapefile CRS:", reprojected_shapefile.crs)
-        print("Raster CRS:", rho.crs)
     
         # Clip GeoTIFF with shapefile
         clipped_data, out_transform = rmask(rho, geometry, crop=True)
