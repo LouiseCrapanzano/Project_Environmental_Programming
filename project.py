@@ -17,7 +17,7 @@ import zipfile
 import os
 import numpy as np
 import rasterio
-from rasterio.mask import mask as rmask
+from rasterio.mask import mask
 import matplotlib.pyplot as plt
 
 # make dataframe 
@@ -80,7 +80,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
             geometry[0] = geometry[0].buffer(0)
     
         # Clip GeoTIFF with shapefile
-        clipped_data, out_transform = rmask(rho, geometry, crop=True)
+        clipped_data, out_transform = mask(rho, geometry, crop=True)
 
         # Update metadata
         out_meta = rho.meta
