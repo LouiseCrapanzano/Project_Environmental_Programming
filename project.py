@@ -98,7 +98,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     # condition = rho_w_unfiltered > 0
     rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
         # Display a simple plot of the band if you put Display=True as input to this function
-    print(Param)
+    print(Param + date)
     print(f"  Min value: {rho_w.min()}")
     print(f"  Max value: {rho_w.max()}")
     print(f"  Mean value: {rho_w.mean()}")
