@@ -45,6 +45,7 @@ for item in items:
 
 items_dir = sorted(items_dir)
 items_R08 = sorted(items_R08)
+
     
 # put list of filenames in dataframe 
 satellite = pd.DataFrame({"filename": (items_dir)})
@@ -81,65 +82,75 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         # Reproject to target CRS
         reprojected_shapefile = shapefile.to_crs(target_crs)
         
-        # Extract all geometries of the reprojected shapefile
-        geometry = list(reprojected_shapefile.geometry)
+        # Iterate over each row of the shapefile
+        for index, row in reprojected_shapefile.iterrows():
+            geometry = row['geometry']
+
+            # Validate and fix invalid geometries
+            if not geometry.is_valid:
+                geometry = geometry.buffer(0)
+
+            # Ensure the shapefile geometry is valid
+            if not geometry.is_valid:
+                geometry = geometry.buffer(0)
+
+            # Validate CRS of shapefile and raster data
+            if shapefile.crs != rho.crs:
+                shapefile = shapefile.to_crs(rho.crs)
+
+            # Clip GeoTIFF with shapefile
+            clipped_data, out_transform = mask(rho, [geometry], crop=True)
+    
+    
+            # Update metadata
+            out_meta = rho.meta
+            out_meta.update({"driver": "GTiff", "height": clipped_data.shape[1], "width": clipped_data.shape[2],
+                     "transform": out_transform})
+    
+            # # Write the clipped data to a new GeoTIFF file
+            # with rasterio.open(output_path, 'w', **meta) as dst:
+            #     dst.write(clipped_R08)
+    
+            # Read the clipped data
+            rho_w_unfiltered = clipped_data[0, :, :]
         
-        #ensure geometry is valid
-        if not geometry[0].is_valid:
-            geometry[0] = geometry[0].buffer(0)
+            condition = ((rho_w_unfiltered != 0) & (rho_w_unfiltered != 32767) & (rho_w_unfiltered > 0))
+            # condition = rho_w_unfiltered > 0
+            rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
+                # Display a simple plot of the band if you put Display=True as input to this function
+            # print(Param + date)
+            # print(f"  Min value: {rho_w.min()}")
+            # print(f"  Max value: {rho_w.max()}")
+            # print(f"  Mean value: {rho_w.mean()}")
+            # print(f"  Std value: {rho_w.std()}")
+            
+            if Display:
+                title = Param + "_Band08_" + date
+                plt.imshow(np.squeeze(rho_w), cmap='gray')
+                plt.title(title)
+                plt.show()
         
-        # Clip GeoTIFF with shapefile
-        clipped_data, out_transform = mask(rho, geometry, crop=True)
-
-        # Update metadata
-        out_meta = rho.meta
-        out_meta.update({"driver": "GTiff", "height": clipped_data.shape[1], "width": clipped_data.shape[2],
-                 "transform": out_transform})
-
-        # # Write the clipped data to a new GeoTIFF file
-        # with rasterio.open(output_path, 'w', **meta) as dst:
-        #     dst.write(clipped_R08)
-
-        # Read the clipped data
-        rho_w_unfiltered = clipped_data[0, :, :]
+            RasterData = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
+            RasterData = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
+            
+            # now save data
+            
+            band_meta = rho.meta  # Get metadata for the band
+            out_meta = band_meta.copy() # copy structure of meta_data 
+            out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
+                             'width':rho.shape[1],
+                             'height':rho.shape[0],
+                             'count':1,
+                             'dtype':'float64',
+                             'crs':rho.crs, 
+                             'transform':rho.transform,
+                             'nodata':0})
+        
+            path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # path of where you want to save raster data
+            with rasterio.open(fp=path_out, # outputpath_name
+                          mode='w',**out_meta) as dst:
+                          dst.write(RasterData, 1)
     
-    condition = ((rho_w_unfiltered != 0) & (rho_w_unfiltered != 32767) & (rho_w_unfiltered > 0))
-    # condition = rho_w_unfiltered > 0
-    rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
-        # Display a simple plot of the band if you put Display=True as input to this function
-    print(Param + date)
-    print(f"  Min value: {rho_w.min()}")
-    print(f"  Max value: {rho_w.max()}")
-    print(f"  Mean value: {rho_w.mean()}")
-    print(f"  Std value: {rho_w.std()}")
-    
-    if Display:
-        title = Param + "_Band08_" + date
-        plt.imshow(np.squeeze(rho_w), cmap='gray')
-        plt.title(title)
-        plt.show()
-
-    RasterData = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
-    RasterData = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
-    
-    # now save data
-    
-    band_meta = rho.meta  # Get metadata for the band
-    out_meta = band_meta.copy() # copy structure of meta_data 
-    out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
-                     'width':rho.shape[1],
-                     'height':rho.shape[0],
-                     'count':1,
-                     'dtype':'float64',
-                     'crs':rho.crs, 
-                     'transform':rho.transform,
-                     'nodata':0})
-    
-    path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # path of where you want to save raster data
-    with rasterio.open(fp=path_out, # outputpath_name
-                  mode='w',**out_meta) as dst:
-                  dst.write(RasterData, 1)
-
     return RasterData #output of function
 
 # make the folders where RasterData is saved, if not created already (Task 5)
