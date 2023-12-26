@@ -67,21 +67,26 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     path_shp = currentdir + '/scheldt_clip.shp'
 
     shapefile = gpd.read_file(path_shp)
+    
+    # Validate and fix invalid geometries
+    if not shapefile.geometry.is_valid.all():
+        shapefile.geometry = shapefile.geometry.buffer(0)
+    
     with rasterio.open(Band) as rho:
         
-        # Define the target CRS you want to reproject to
-        target_crs = 'EPSG:32631'  
-
-        # Reproject the GeoDataFrame to the target CRS
+        # Define the target CRS 
+        target_crs = 'EPSG:32631'
+        
+        # Reproject to target CRS
         reprojected_shapefile = shapefile.to_crs(target_crs)
         
-        # Extract the geometry of the reprojected shapefile
-        geometry = [reprojected_shapefile.geometry.values[0]]
-
-        # Ensure the geometry is a valid GeoJSON-like geometry
+        # Extract all geometries of the reprojected shapefile
+        geometry = list(reprojected_shapefile.geometry)
+        
+        #ensure geometry is valid
         if not geometry[0].is_valid:
             geometry[0] = geometry[0].buffer(0)
-    
+        
         # Clip GeoTIFF with shapefile
         clipped_data, out_transform = mask(rho, geometry, crop=True)
 
