@@ -4,7 +4,6 @@ Created on Tue Dec 12 10:53:46 2023
 
 @author: louis, livacke
 """
-# !pip install rasterio.mask
 
 ## Task 2 
 
@@ -26,20 +25,23 @@ currentdir = input('What is the path of your data on your computer?\n')  # inter
 
 items_dir = []
 items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
+
+items_R08 = []  # Initialize the list outside the loop
+
 for item in items:
     path = os.path.join(currentdir, item)
-    if item[-4:]=='.zip':      # code to unzip zipfiles if present
-        with zipfile.ZipFile(path,"r") as zip_ref:
+    if item[-4:] == '.zip':
+        with zipfile.ZipFile(path, "r") as zip_ref:
             zip_ref.extractall(currentdir)
         os.remove(path)
-    if (os.path.isdir(os.path.join(currentdir, item))):
-        
-        if(item[:3]=='R08'): #only look for folders with filename that start with 'R08'
+    if os.path.isdir(os.path.join(currentdir, item)):
+        if item[:3] == 'R08': #only look for folders with filename that start with 'R08'
         # print(item) #only print name not entire path
-            items_R08=sorted(os.listdir(path))
-        # items_dir.append(item)\=
-        if(item[:2]=='S2'):
+            items_R08.extend(sorted(os.listdir(path)))  # Use extend instead of append
+            # items_dir.append(item)\=
+        if item[:2] == 'S2':
             items_dir.append(item)
+
 items_dir = sorted(items_dir)
     
 # put list of filenames in dataframe 
