@@ -36,6 +36,7 @@ for item in items:
         os.remove(path)
     if os.path.isdir(os.path.join(currentdir, item)):
         if item[:3] == 'R08': # only look for folders with filename that start with 'R08'
+        
         # print(item) #only print name not entire path
             items_R08.extend(sorted(os.listdir(path)))  # Use extend instead of append
             # items_dir.append(item)\=
