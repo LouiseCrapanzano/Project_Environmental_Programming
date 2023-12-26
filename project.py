@@ -13,7 +13,7 @@ import pathlib
 import geopandas as gpd
 import pandas as pd
 import zipfile
-# list of subfolders (1ste column of the dataframe)
+# list of subfolders (1st column of the dataframe)
 import os
 import numpy as np
 import rasterio
@@ -146,7 +146,7 @@ CreateFolder(currentdir, 'CHL')
 for Band in All_Band08:
     path_folder = currentdir + '/R08_Bands/'
     path = os.path.join(path_folder,Band)
-    # bereken TUR:
+    # calculate TUR:
     A_p = 1602.93
     C_p = 0.19130
     Param = 'TUR'
@@ -154,7 +154,7 @@ for Band in All_Band08:
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
     TUR_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
 
-    # bereken nu  SPM:
+    # calculate SPM:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
