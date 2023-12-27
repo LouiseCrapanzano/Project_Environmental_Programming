@@ -49,8 +49,9 @@ satellite["date"]=satellite["filename"].str[11:19]
 
 print(satellite)
 
-# Path_Liv = '/Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data'
+# Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
 # Path_Louis = r'C:\Users\louis\Downloads\EP_Project\Data' 
+
 
 ## Task 4 and Task 5
 
@@ -95,7 +96,8 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     condition = ((rho_w_unfiltered != 0) & (rho_w_unfiltered != 32767) & (rho_w_unfiltered > 0))
     # condition = rho_w_unfiltered > 0
     rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
-        # Display a simple plot of the band if you put Display=True as input to this function
+    
+    # Display a simple plot of the band if you put Display=True as input to this function
     print(Param)
     print(f"  Min value: {rho_w.min()}")
     print(f"  Max value: {rho_w.max()}")
@@ -139,11 +141,13 @@ def CreateFolder(currentdir, Param):
     
 CreateFolder(currentdir, 'TUR')
 CreateFolder(currentdir, 'SPM')
-CreateFolder(currentdir, 'CHL')
 
 for Band in All_Band08:
     path_folder = currentdir + '/R08_Bands/'
     path = os.path.join(path_folder,Band)
+    
+    # Update expected dimensions based on clipped_data
+    
     # bereken TUR:
     A_p = 1602.93
     C_p = 0.19130
