@@ -38,7 +38,7 @@ for item in items:
         # items_dir.append(item)\=
         if(item[:2]=='S2'):
             items_dir.append(item)
-items_dir = sorted(items_dir)
+            items_dir = sorted(items_dir)
     
 # put list of filenames in dataframe 
 satellite = pd.DataFrame({"filename": (items_dir)})
