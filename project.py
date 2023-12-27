@@ -17,6 +17,7 @@ import numpy as np
 import rasterio
 from rasterio.mask import mask as rmask
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 # make dataframe 
 satellite = pd.DataFrame() #currently empty
@@ -76,7 +77,11 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         # Ensure the geometry is a valid GeoJSON-like geometry
         if not geometry[0].is_valid:
             geometry[0] = geometry[0].buffer(0)
-    
+        
+        # Check and fix the validity again after buffering
+        if not geometry[0].is_valid:
+            geometry[0] = geometry[0].buffer(0)
+            
         # Clip GeoTIFF with shapefile
         clipped_data, out_transform = rmask(rho, geometry, crop=True)
 
@@ -104,11 +109,19 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     print(f"  Mean value: {rho_w.mean()}")
     print(f"  Std value: {rho_w.std()}")
     
+
     if Display:
-        title = Param + "_Band08_" + date
-        plt.imshow(np.squeeze(rho_w), cmap='gray')
-        plt.title(title)
-        plt.show()
+            title = Param + "_Band08_" + date
+            cmap = plt.get_cmap('rainbow')  # You can choose whatever colormap you want
+            norm = mcolors.Normalize(vmin=rho_w.min(), vmax=rho_w.max())
+            plt.imshow(np.squeeze(rho_w), cmap=cmap, norm=norm)
+            plt.title(title)
+     
+            # Add colorbar
+            cbar = plt.colorbar()
+            cbar.set_label('Turbidity [FNU]')
+     
+            plt.show()
 
     RasterData = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
     RasterData = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
