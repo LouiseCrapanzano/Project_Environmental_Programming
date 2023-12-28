@@ -185,7 +185,8 @@ for Band in All_Band08:
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
     SPM_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
     
-# Task 8
+    
+## Task 8
 satellite = pd.DataFrame()
 
 years = satellite['date']
