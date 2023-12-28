@@ -21,7 +21,7 @@ import matplotlib.colors as mcolors
 
 # make dataframe 
 satellite = pd.DataFrame() #currently empty
-currentdir = input('What is the path of your data on your computer?\n')  # interacting with user
+currentdir = input('What is the path to your unziped file (Clipped data) on your computer?\n')  # interacting with user
 
 items_dir = []
 items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
@@ -52,7 +52,7 @@ print(satellite)
 
 # Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
 # Path_Louis = r'C:\Users\louis\Downloads\EP_Project\Data' 
-
+# Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
 
@@ -184,3 +184,29 @@ for Band in All_Band08:
     # tif = find_band08(folder)
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
     SPM_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
+    
+# Task 8
+satellite = pd.DataFrame()
+
+years = satellite['date']
+mean_SPM = satellite['mean_SPM']
+mean_TUR = satellite['mean_TUR']
+
+satellite['date'] = pd.to_datetime(satellite['date'])
+# Haal het jaartal uit de 'date' kolom
+satellite['year'] = satellite['date'].dt.year
+
+# functie om de beide parameters te plotten over de jaren heen
+def plot_mean(satellite, column, label):
+    plt.plot(satellite.index, satellite[column], label=label)
+    plt.xlabel('Years')
+    plt.ylabel(f'Mean for {column}')
+    plt.legend()
+    plt.title(f'Mean for {column} over the years')
+    plt.show()
+
+# Plot voor Mean for SPM
+plot_mean(satellite, 'mean_SPM', 'Mean for SPM')
+
+# Plot voor Mean for TUR
+plot_mean(satellite, 'mean_TUR', 'Mean for TUR')
