@@ -103,18 +103,22 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
     
     # Display a simple plot of the band if you put Display=True as input to this function
-    print(Param)
-    print(f"  Min value: {rho_w.min()}")
-    print(f"  Max value: {rho_w.max()}")
-    print(f"  Mean value: {rho_w.mean()}")
-    print(f"  Std value: {rho_w.std()}")
+    # print('Rho_w' + date)
+    # print(f"  Min value: {rho_w.min()}")
+    # print(f"  Max value: {rho_w.max()}")
+    # print(f"  Mean value: {rho_w.mean()}")
+    # print(f"  Std value: {rho_w.std()}")
     
-
+    RasterData_unfiltered = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
+    RasterData_unfiltered = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
+    condition = ((RasterData_unfiltered != 65535) & (RasterData_unfiltered > 0) & (RasterData_unfiltered < 100))
+    RasterData = np.ma.masked_array(RasterData_unfiltered, mask=~condition)
+    
     if Display:
             title = Param + "_Band08_" + date
             cmap = plt.get_cmap('rainbow')  # You can choose whatever colormap you want
-            norm = mcolors.Normalize(vmin=rho_w.min(), vmax=rho_w.max())
-            plt.imshow(np.squeeze(rho_w), cmap=cmap, norm=norm)
+            norm = mcolors.Normalize(vmin=RasterData.min(), vmax=100)
+            plt.imshow(np.squeeze(RasterData), cmap=cmap, norm=norm)
             plt.title(title)
      
             # Add colorbar
@@ -122,10 +126,14 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
             cbar.set_label('Turbidity [FNU]')
      
             plt.show()
+            
+    print(Param + date)
+    print(f"  Min value: {RasterData.min()}")
+    print(f"  Max value: {RasterData.max()}")
+    print(f"  Mean value: {RasterData.mean()}")
+    print(f"  Std value: {RasterData.std()}")
 
-    RasterData = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
-    RasterData = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
-    
+   
     # now save data
     
     band_meta = rho.meta  # Get metadata for the band
@@ -175,4 +183,4 @@ for Band in All_Band08:
     Param = 'SPM'
     # tif = find_band08(folder)
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
-    SPM_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0])
+    SPM_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
