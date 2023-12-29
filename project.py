@@ -193,7 +193,31 @@ for Band in All_Band08:
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
     PlotRaster(SPM_data, Param, date[0], True)
     
-    
+## Task 6
+import rasterstats
+
+def custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata, currentdir):
+    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata)
+    return result
+
+vector_path = currentdir + '\scheldt_clip.shp'
+stats = ['min', 'max', 'mean', 'std', 'median']
+nodata = 65535
+
+tif_folder = currentdir + '\TUR'
+tif_files = [f for f in os.listdir(tif_folder) if f.endswith('.tif')]
+
+for tif_file in tif_files:
+    tif_path = os.path.join(tif_folder, tif_file)
+    prefix = 'TUR'
+    result = custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata, currentdir)
+    print(f"Vector Path: {vector_path}")
+    print(f"Raster Path: {tif_path}")
+    print(f"Stats: {stats}")
+    print(f"Prefix: {prefix}")
+    print(f"Nodata: {nodata}")
+    print(f"Intermediate Result: {result}")
+
 ## Task 8
 
 years = satellite['date']
