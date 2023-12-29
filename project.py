@@ -187,7 +187,6 @@ for Band in All_Band08:
     
     
 ## Task 8
-satellite = pd.DataFrame()
 
 years = satellite['date']
 mean_SPM = satellite['mean_SPM']
