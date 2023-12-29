@@ -18,6 +18,7 @@ import rasterio
 from rasterio.mask import mask as rmask
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import rasterstats
 
 # make dataframe 
 satellite = pd.DataFrame() #currently empty
@@ -51,11 +52,7 @@ satellite["date"]=satellite["filename"].str[11:19]
 print(satellite)
 
 # Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
-<<<<<<< HEAD
 # Path_Louis = r'C:/Users/louis/Downloads/EP_Project/Data' 
-=======
-# Path_Louis = C:\Users\louis\Downloads\EP_Project\Data\Clipped_data 
->>>>>>> d6aeb0d7b8f64b12c381caae8fc20b35bf861b11
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
@@ -64,9 +61,10 @@ All_Band08 = list(satellite["Band08"])
 
 # Calculating TUR and SPM
 def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
-    path_shp = currentdir + '/scheldt_clip.shp'
+    path_shp = currentdir + '/reprojected_shapefile.shp'
 
     shapefile = gpd.read_file(path_shp)
+    
     with rasterio.open(Band) as rho:
         
         # Define the target CRS you want to reproject to
@@ -74,6 +72,8 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
 
         # Reproject the GeoDataFrame to the target CRS
         reprojected_shapefile = shapefile.to_crs(target_crs)
+        output_path = currentdir + "/reprojected_shapefile.shp"
+        reprojected_shapefile.to_file(output_path)
         
         # Extract the geometry of the reprojected shapefile
         geometry = [reprojected_shapefile.geometry.values[0]]
@@ -185,7 +185,7 @@ for Band in All_Band08:
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
     TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
     SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
-    PlotRaster(TUR_data, Param, date[0], True)
+    # PlotRaster(TUR_data, Param, date[0], True)
     
     # bereken nu  SPM:
     A_p = 1801.52
@@ -195,32 +195,35 @@ for Band in All_Band08:
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
     SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
-    PlotRaster(SPM_data, Param, date[0], True)
+    # PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
-import rasterstats
 
-def custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata, currentdir):
-    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata)
+def custom_zonal_stats(vector_path, tif_path, stats, nodata):
+    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, nodata=nodata)
     return result
 
-vector_path = currentdir + '\scheldt_clip.shp'
+vector_path = currentdir + '/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
 nodata = 65535
 
-tif_folder = currentdir + '\TUR'
+gdf = gpd.read_file(vector_path)
+
+tif_folder = currentdir + '/TUR'
 tif_files = [f for f in os.listdir(tif_folder) if f.endswith('.tif')]
 
 for tif_file in tif_files:
     tif_path = os.path.join(tif_folder, tif_file)
+
     prefix = 'TUR'
-    result = custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata, currentdir)
+    result = custom_zonal_stats(gdf, tif_path, stats, nodata)
     print(f"Vector Path: {vector_path}")
     print(f"Raster Path: {tif_path}")
     print(f"Stats: {stats}")
-    print(f"Prefix: {prefix}")
+    # print(f"Prefix: {prefix}")
     print(f"Nodata: {nodata}")
     print(f"Intermediate Result: {result}")
+
 
 ## Task 8
 
