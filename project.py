@@ -98,12 +98,6 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     # condition = rho_w_unfiltered > 0
     rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
     
-    # Display a simple plot of the band if you put Display=True as input to this function
-    # print('Rho_w' + date)
-    # print(f"  Min value: {rho_w.min()}")
-    # print(f"  Max value: {rho_w.max()}")
-    # print(f"  Mean value: {rho_w.mean()}")
-    # print(f"  Std value: {rho_w.std()}")
     
     RasterData_unfiltered = np.zeros(np.shape(rho_w)) # Same shape as rho_w, first all zeros
     RasterData_unfiltered = A_p*rho_w/(1-rho_w/C_p) # Formula to calculate SPM and TUR
