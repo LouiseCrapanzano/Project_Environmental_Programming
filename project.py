@@ -144,15 +144,7 @@ def PlotRaster(RasterData, Param, date, Display):
             cbar = plt.colorbar()
             cbar.set_label('Turbidity [FNU]')
      
-            plt.show()
-            
-def ZonalStatistics(RasterData):
-    Min_value = RasterData.min()
-    Max_value = RasterData.max()
-    Mean_value = RasterData.mean()
-    Std_value = RasterData.std()
-    return Mean_value
-
+            plt.show()      
 
 # make the folders where RasterData is saved, if not created already (Task 5)
 def CreateFolder(currentdir, Param):
@@ -190,32 +182,37 @@ for Band in All_Band08:
     PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
-
-def custom_zonal_stats(vector_path, tif_path, stats, nodata):
-    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, nodata=nodata)
+# function to calculate zonal statistics using rasterstats.zonal_stats
+def custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata):
+    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata)
     return result
 
+# constant values for both parameters (TUR and SPM)
 vector_path = currentdir + '/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
 nodata = 65535
 
 gdf = gpd.read_file(vector_path)
 
-tif_folder = currentdir + '/TUR'
-tif_files = [f for f in os.listdir(tif_folder) if f.endswith('.tif')]
+# calculating zonal statistics for every tif file in TUR folder using a for loop
+tif_folder_TUR = currentdir + '/TUR'
+tif_files_TUR = [f for f in os.listdir(tif_folder_TUR) if f.endswith('.tif')]
 
-for tif_file in tif_files:
-    tif_path = os.path.join(tif_folder, tif_file)
-
+for tif_file_TUR in tif_files_TUR:
+    tif_path = os.path.join(tif_folder_TUR, tif_file_TUR)
     prefix = 'TUR'
-    result = custom_zonal_stats(gdf, tif_path, stats, nodata)
-    print(f"Vector Path: {vector_path}")
-    print(f"Raster Path: {tif_path}")
-    print(f"Stats: {stats}")
-    # print(f"Prefix: {prefix}")
-    print(f"Nodata: {nodata}")
-    print(f"Intermediate Result: {result}")
+    result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
+    print(f"Zonal statistics for {tif_file_TUR}: {result}")
 
+# calculating zonal statistics for every tif file in SPM folder using a for loop
+tif_folder_SPM = currentdir + '/SPM'
+tif_files_SPM = [f for f in os.listdir(tif_folder_SPM) if f.endswith('.tif')]
+
+for tif_file_SPM in tif_files_SPM:
+    tif_path = os.path.join(tif_folder_SPM, tif_file_SPM)
+    prefix = 'SPM'
+    result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
+    print(f"Zonal statistics for {tif_file_SPM}: {result}")
 
 ## Task 8
 
