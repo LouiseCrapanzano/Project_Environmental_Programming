@@ -21,7 +21,7 @@ import matplotlib.colors as mcolors
 
 # make dataframe 
 satellite = pd.DataFrame() #currently empty
-currentdir = input('What is the path to your unziped file (Clipped data) on your computer?\n')  # interacting with user
+currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')  # interacting with user
 
 items_dir = []
 items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
@@ -114,9 +114,32 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     condition = ((RasterData_unfiltered != 65535) & (RasterData_unfiltered > 0) & (RasterData_unfiltered < 100))
     RasterData = np.ma.masked_array(RasterData_unfiltered, mask=~condition)
     
+    # out_meta = out_meta.copy() # copy structure of meta_data 
+    out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
+                     'width':rho.shape[1],
+                     'height':rho.shape[0],
+                     'count':1,
+                     'dtype':'float64',
+                     'crs':rho.crs, 
+                     'transform':rho.transform,
+                     'nodata':0})
+    
+    return RasterData, out_meta
+
+# save data (task 5)
+def SaveRaster(RasterData, out_meta, currentdir, Param, date):
+    # now save data
+    # band_meta = rho.meta  # Get metadata for the band
+    
+    path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # path of where you want to save raster data
+    with rasterio.open(fp=path_out, # outputpath_name
+                  mode='w',**out_meta) as dst:
+                  dst.write(RasterData, 1)
+    
+def PlotRaster(RasterData, Param, date, Display):
     if Display:
-            title = Param + "_Band08_" + date
-            cmap = plt.get_cmap('rainbow')  # You can choose whatever colormap you want
+            title = Param + "_Band08_" + date[0]
+            cmap = plt.get_cmap('rainbow')  # Colormap
             norm = mcolors.Normalize(vmin=RasterData.min(), vmax=100)
             plt.imshow(np.squeeze(RasterData), cmap=cmap, norm=norm)
             plt.title(title)
@@ -127,32 +150,13 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
      
             plt.show()
             
-    print(Param + date)
-    print(f"  Min value: {RasterData.min()}")
-    print(f"  Max value: {RasterData.max()}")
-    print(f"  Mean value: {RasterData.mean()}")
-    print(f"  Std value: {RasterData.std()}")
+def ZonalStatistics(RasterData):
+    Min_value = RasterData.min()
+    Max_value = RasterData.max()
+    Mean_value = RasterData.mean()
+    Std_value = RasterData.std()
+    return Mean_value
 
-   
-    # now save data
-    
-    band_meta = rho.meta  # Get metadata for the band
-    out_meta = band_meta.copy() # copy structure of meta_data 
-    out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
-                     'width':rho.shape[1],
-                     'height':rho.shape[0],
-                     'count':1,
-                     'dtype':'float64',
-                     'crs':rho.crs, 
-                     'transform':rho.transform,
-                     'nodata':0})
-    
-    path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # path of where you want to save raster data
-    with rasterio.open(fp=path_out, # outputpath_name
-                  mode='w',**out_meta) as dst:
-                  dst.write(RasterData, 1)
-
-    return RasterData #output of function
 
 # make the folders where RasterData is saved, if not created already (Task 5)
 def CreateFolder(currentdir, Param):
@@ -175,19 +179,22 @@ for Band in All_Band08:
     Param = 'TUR'
     # tif = find_band08(folder) # get the right.tif file
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
-    TUR_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
-
+    TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
+    SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
+    PlotRaster(TUR_data, Param, date[0], True)
+    
     # bereken nu  SPM:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
     # tif = find_band08(folder)
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
-    SPM_data = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
+    SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
+    SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
+    PlotRaster(SPM_data, Param, date[0], True)
     
     
 ## Task 8
-satellite = pd.DataFrame()
 
 years = satellite['date']
 mean_SPM = satellite['mean_SPM']
