@@ -126,6 +126,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     
     return RasterData, out_meta
 
+# save data (task 5)
 def SaveRaster(RasterData, out_meta, currentdir, Param, date):
     # now save data
     # band_meta = rho.meta  # Get metadata for the band
