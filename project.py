@@ -185,7 +185,7 @@ for Band in All_Band08:
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
     TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
     SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
-    # PlotRaster(TUR_data, Param, date[0], True)
+    PlotRaster(TUR_data, Param, date[0], True)
     
     # bereken nu  SPM:
     A_p = 1801.52
@@ -195,7 +195,7 @@ for Band in All_Band08:
     # date = list(satellite.loc[satellite.filename == folder, 'date'])
     SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
-    # PlotRaster(SPM_data, Param, date[0], True)
+    PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
 
