@@ -77,14 +77,6 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         
         # Extract the geometry of the reprojected shapefile
         geometry = [reprojected_shapefile.geometry.values[0]]
-
-        # Ensure the geometry is a valid GeoJSON-like geometry
-        if not geometry[0].is_valid:
-            geometry[0] = geometry[0].buffer(0)
-        
-        # Check and fix the validity again after buffering
-        if not geometry[0].is_valid:
-            geometry[0] = geometry[0].buffer(0)
             
         # Clip GeoTIFF with shapefile
         clipped_data, out_transform = rmask(rho, geometry, crop=True)
@@ -142,7 +134,7 @@ def SaveRaster(RasterData, out_meta, currentdir, Param, date):
     
 def PlotRaster(RasterData, Param, date, Display):
     if Display:
-            title = Param + "_Band08_" + date[0]
+            title = Param + ' ' + date
             cmap = plt.get_cmap('rainbow')  # Colormap
             norm = mcolors.Normalize(vmin=RasterData.min(), vmax=100)
             plt.imshow(np.squeeze(RasterData), cmap=cmap, norm=norm)
