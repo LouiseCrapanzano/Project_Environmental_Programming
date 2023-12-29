@@ -11,7 +11,7 @@ Created on Tue Dec 12 10:53:46 2023
 import geopandas as gpd
 import pandas as pd
 import zipfile
-# list of subfolders (1ste column of the dataframe)
+# list of subfolders (1st column of the dataframe)
 import os
 import numpy as np
 import rasterio
@@ -51,7 +51,11 @@ satellite["date"]=satellite["filename"].str[11:19]
 print(satellite)
 
 # Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
+<<<<<<< HEAD
 # Path_Louis = r'C:/Users/louis/Downloads/EP_Project/Data' 
+=======
+# Path_Louis = C:\Users\louis\Downloads\EP_Project\Data\Clipped_data 
+>>>>>>> d6aeb0d7b8f64b12c381caae8fc20b35bf861b11
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
