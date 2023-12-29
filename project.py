@@ -21,7 +21,7 @@ import matplotlib.colors as mcolors
 
 # make dataframe 
 satellite = pd.DataFrame() #currently empty
-currentdir = input('What is the path to your unziped file (Clipped data) on your computer?\n')  # interacting with user
+currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')  # interacting with user
 
 items_dir = []
 items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
