@@ -116,7 +116,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     
     if Display:
             title = Param + "_Band08_" + date
-            cmap = plt.get_cmap('rainbow')  # You can choose whatever colormap you want
+            cmap = plt.get_cmap('rainbow')  # Colormap
             norm = mcolors.Normalize(vmin=RasterData.min(), vmax=100)
             plt.imshow(np.squeeze(RasterData), cmap=cmap, norm=norm)
             plt.title(title)
