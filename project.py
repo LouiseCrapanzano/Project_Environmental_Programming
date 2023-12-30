@@ -35,9 +35,7 @@ for item in items:
     if (os.path.isdir(os.path.join(currentdir, item))):
         
         if(item[:3]=='R08'): #only look for folders with filename that start with 'R08'
-        # print(item) #only print name not entire path
             items_R08=sorted(os.listdir(path))
-        # items_dir.append(item)\=
         if(item[:2]=='S2'):
             items_dir.append(item)
             items_dir = sorted(items_dir)
@@ -48,6 +46,8 @@ satellite = pd.DataFrame({"filename": (items_dir)})
 satellite["Band08"]=items_R08
 # extract date from filename (2nd colomn dataframe)
 satellite["date"]=satellite["filename"].str[11:19]
+
+satellite = satellite.sort_values("date")
 
 print(satellite)
 
@@ -85,17 +85,11 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         out_meta = rho.meta
         out_meta.update({"driver": "GTiff", "height": clipped_data.shape[1], "width": clipped_data.shape[2],
                  "transform": out_transform})
-        
-
-        # Write the clipped data to a new GeoTIFF file
-        # with rasterio.open(output_path, 'w', **meta) as dst:
-        #     dst.write(clipped_R08)
 
         # Read the clipped data
         rho_w_unfiltered = clipped_data[0, :, :]
     
     condition = ((rho_w_unfiltered != 0) & (rho_w_unfiltered != 32767) & (rho_w_unfiltered > 0))
-    # condition = rho_w_unfiltered > 0
     rho_w = np.ma.masked_array(rho_w_unfiltered, mask=~condition)*1/10000
     
     
@@ -104,7 +98,6 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     condition = ((RasterData_unfiltered != 65535) & (RasterData_unfiltered > 0) & (RasterData_unfiltered < 100))
     RasterData = np.ma.masked_array(RasterData_unfiltered, mask=~condition)
     
-    # out_meta = out_meta.copy() # copy structure of meta_data 
     out_meta.update({'driver':'GTiff',         # adapt value of variables to desired
                      'width':rho.shape[1],
                      'height':rho.shape[0],
@@ -117,10 +110,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     return RasterData, out_meta
 
 # save data (task 5)
-def SaveRaster(RasterData, out_meta, currentdir, Param, date):
-    # now save data
-    # band_meta = rho.meta  # Get metadata for the band
-    
+def SaveRaster(RasterData, out_meta, currentdir, Param, date):    
     path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # path of where you want to save raster data
     with rasterio.open(fp=path_out, # outputpath_name
                   mode='w',**out_meta) as dst:
@@ -149,6 +139,7 @@ def CreateFolder(currentdir, Param):
 CreateFolder(currentdir, 'TUR')
 CreateFolder(currentdir, 'SPM')
 
+
 for Band in All_Band08:
     path_folder = currentdir + '/R08_Bands/'
     path = os.path.join(path_folder,Band)
@@ -159,99 +150,68 @@ for Band in All_Band08:
     A_p = 1602.93
     C_p = 0.19130
     Param = 'TUR'
-    # tif = find_band08(folder) # get the right.tif file
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
     TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
     SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
     PlotRaster(TUR_data, Param, date[0], True)
     
+    # constant variables for both parameters (TUR and SPM)
+    
     # calculate SPM:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
-    # tif = find_band08(folder)
-    # date = list(satellite.loc[satellite.filename == folder, 'date'])
     SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
     PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
-# function to calculate zonal statistics using rasterstats.zonal_stats
+# Define the function to calculate zonal statistics using rasterstats.zonal_stats
 def custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata):
-    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata)
-    return result
+    # Calculate zonal statistics and convert the result to a GeoDataFrame
+    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata, geojson_out=True)
+    geostats = gpd.GeoDataFrame.from_features(result)
+    return geostats
 
-# constant values for both parameters (TUR and SPM)
+# Define parameters
+Params = ['TUR','SPM']
 vector_path = currentdir + '/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
 nodata = 65535
+geodataframes_list_TUR = []
+geodataframes_list_SPM = []
 
-gdf = gpd.read_file(vector_path) #read geometry of the shapefile?
+# Loop through each parameter (TUR, SPM)
+for Param in Params:
+    tif_folder = currentdir + '/' + Param
+    tif_files = sorted([f for f in os.listdir(tif_folder) if f.endswith('.tif')])
+    
+    # Loop through each TIFF file for the current parameter
+    for tif_file in tif_files:
+        tif_path = os.path.join(tif_folder, tif_file)
+        
+        # Calculate zonal statistics for the current parameter and TIFF file
+        geostats = custom_zonal_stats(vector_path, tif_path, stats, Param, nodata)
+        
+        # Select relevant columns from the result (excluding the first two columns)
+        start_column_index = 2
+        selected_geostats = geostats.iloc[:, start_column_index:]
+        
+        # Append the selected zonal statistics to the appropriate list based on the parameter
+        if(Param == 'TUR'):
+            geodataframes_list_TUR.append(selected_geostats)
+        elif(Param == 'SPM'):
+            geodataframes_list_SPM.append(selected_geostats)
 
-# calculating zonal statistics for every tif file in TUR folder using a for loop and the function defined above
-tif_folder_TUR = currentdir + '/TUR'
-tif_files_TUR = [f for f in os.listdir(tif_folder_TUR) if f.endswith('.tif')]
+# Concatenate the zonal statistics GeoDataFrames for TUR and SPM
+concatenated_geodataframe_TUR = gpd.GeoDataFrame(pd.concat(geodataframes_list_TUR, ignore_index=True))
+concatenated_geodataframe_SPM = gpd.GeoDataFrame(pd.concat(geodataframes_list_SPM, ignore_index=True))
 
-for tif_file_TUR in tif_files_TUR: #iterating over all the tif files in the TUR folder
-    tif_path = os.path.join(tif_folder_TUR, tif_file_TUR)
-    prefix = 'TUR'
-    result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
-    print(f"Zonal statistics for {tif_file_TUR}: {result}")
+# Concatenate the satellite GeoDataFrame with the zonal statistics for TUR and SPM
+concatenated_geodataframes = gpd.GeoDataFrame(pd.concat([satellite, concatenated_geodataframe_TUR], axis=1))
+satellite = gpd.GeoDataFrame(pd.concat([concatenated_geodataframes, concatenated_geodataframe_SPM], axis=1))
 
-# calculating zonal statistics for every tif file in SPM folder using a for loop
-tif_folder_SPM = currentdir + '/SPM'
-tif_files_SPM = [f for f in os.listdir(tif_folder_SPM) if f.endswith('.tif')]
-
-for tif_file_SPM in tif_files_SPM: #iterating over all the tif files in the SPM folder
-    tif_path = os.path.join(tif_folder_SPM, tif_file_SPM)
-    prefix = 'SPM'
-    result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
-    print(f"Zonal statistics for {tif_file_SPM}: {result}")
-
-
-# defining a function to make a dictionary out of a list from the results of the zonal statistics (1 for each parameter)
-def dict_zonal_stats(results_list, prefix):
-    # Extract values for multiple keys into a dictionary
-    key_value_dict = {f'{prefix}{key}': [entry[f'{prefix}{key}'] for entry in results_list] for key in ['min', 'max', 'mean', 'std', 'median']}
-
-    # Print the resulting dictionary
-    print(key_value_dict)
-
-    # Create a DataFrame from the dictionary
-    df_to_add = pd.DataFrame(key_value_dict)
-
-    return df_to_add
-
-# list of dictionaries for TUR
-results_list_TUR = [
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 10.525367290375188, 'TURstd': 15.007504252561962, 'TURmedian': 6.715951318910258},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 7.008311438179179, 'TURstd': 12.968962695433968, 'TURmedian': 2.7494138465189875},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 19.744980209635163, 'TURstd': 19.86631586763264, 'TURmedian': 19.794267692821368},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 22.869519741495395, 'TURstd': 23.09241296062801, 'TURmedian': 26.846298115974992},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 6.7305991093977156, 'TURstd': 9.860765562508538, 'TURmedian': 4.225041459459459},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 19.61000536651641, 'TURstd': 19.545095548126554, 'TURmedian': 19.976024250000002},
-    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 11.000622355221449, 'TURstd': 12.131615657528783, 'TURmedian': 9.928996513761469},
-]
-
-# list of dictionaries for SPM
-results_list_SPM = [
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 11.41650600720615, 'SPMstd': 15.822073933103752, 'SPMmedian': 7.548003106837608},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.377600785178969, 'SPMstd': 12.926593405598942, 'SPMmedian': 2.906743498154982},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 20.924180634269295, 'SPMstd': 20.449331662834624, 'SPMmedian': 21.635154271111112},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 23.783256306621794, 'SPMstd': 23.77214478032368, 'SPMmedian': 28.898218044192635},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.373834421625951, 'SPMstd': 10.268240053375964, 'SPMmedian': 4.748489759406465},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 20.919317537171043, 'SPMstd': 20.296808850522744, 'SPMmedian': 22.042569098998886},
-    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 12.173073488460528, 'SPMstd': 13.051696058022559, 'SPMmedian': 10.967214554476806},
-]
-
-# create new dataframes
-df_to_add_TUR = dict_zonal_stats(results_list_TUR, 'TUR')
-df_to_add_SPM = dict_zonal_stats(results_list_SPM, 'SPM')
-
-# Concatenate the existing DataFrame with the new DataFrames
-satellite = pd.concat([satellite, df_to_add_TUR, df_to_add_SPM], axis=1)
-
-# Print the resulting DataFrame
+# Print the final GeoDataFrame
 print(satellite)
 
 
@@ -275,8 +235,8 @@ def plot_mean(satellite, column, label, color):
     plt.xticks(satellite['year'])
     plt.show()
 
-# Plot for Mean for SPM
-plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
-
 # Plot for Mean for TUR
 plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
+
+# Plot for Mean for SPM
+plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
