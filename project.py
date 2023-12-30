@@ -214,6 +214,51 @@ for tif_file_SPM in tif_files_SPM:
     result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
     print(f"Zonal statistics for {tif_file_SPM}: {result}")
 
+
+# Create 2 list of dictionaries from zonal stats (1 for TUR, 1 for SPM)
+#TUR
+results_list_TUR = [
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 10.525367290375188, 'TURstd': 15.007504252561962, 'TURmedian': 6.715951318910258},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 7.008311438179179, 'TURstd': 12.968962695433968, 'TURmedian': 2.7494138465189875},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 19.744980209635163, 'TURstd': 19.86631586763264, 'TURmedian': 19.794267692821368},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 22.869519741495395, 'TURstd': 23.09241296062801, 'TURmedian': 26.846298115974992},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 6.7305991093977156, 'TURstd': 9.860765562508538, 'TURmedian': 4.225041459459459},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 19.61000536651641, 'TURstd': 19.545095548126554, 'TURmedian': 19.976024250000002},
+    {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 11.000622355221449, 'TURstd': 12.131615657528783, 'TURmedian': 9.928996513761469},
+]
+
+#SPM
+results_list_SPM = [
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 11.41650600720615, 'SPMstd': 15.822073933103752, 'SPMmedian': 7.548003106837608},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.377600785178969, 'SPMstd': 12.926593405598942, 'SPMmedian': 2.906743498154982},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 20.924180634269295, 'SPMstd': 20.449331662834624, 'SPMmedian': 21.635154271111112},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 23.783256306621794, 'SPMstd': 23.77214478032368, 'SPMmedian': 28.898218044192635},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.373834421625951, 'SPMstd': 10.268240053375964, 'SPMmedian': 4.748489759406465},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 20.919317537171043, 'SPMstd': 20.296808850522744, 'SPMmedian': 22.042569098998886},
+    {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 12.173073488460528, 'SPMstd': 13.051696058022559, 'SPMmedian': 10.967214554476806},
+    ]
+
+# Extract values for multiple keys into a dictionary
+#TUR
+key_value_dict_TUR = {key: [entry[key] for entry in results_list_TUR] for key in ['TURmin', 'TURmax', 'TURmean', 'TURstd', 'TURmedian']}
+
+#SPM
+key_value_dict_SPM = {key: [entry[key] for entry in results_list_SPM] for key in ['SPMmin', 'SPMmax', 'SPMmean', 'SPMstd', 'SPMmedian']}
+
+# Print the resulting dictionaries
+print(key_value_dict_TUR)
+print(key_value_dict_SPM)
+
+# Create DataFrames from the dictionaries
+df_to_add_TUR = pd.DataFrame(key_value_dict_TUR)
+df_to_add_SPM = pd.DataFrame(key_value_dict_SPM)
+
+# Concatenate the existing DataFrame with the new DataFrames
+satellite = pd.concat([satellite, df_to_add_TUR, df_to_add_SPM], axis=1)
+
+# Print the resulting DataFrame
+print(satellite)
+
 ## Task 8
 
 years = satellite['date']
