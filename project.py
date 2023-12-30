@@ -52,7 +52,7 @@ satellite["date"]=satellite["filename"].str[11:19]
 print(satellite)
 
 # Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
-# Path_Louis = r'C:/Users/louis/Downloads/EP_Project/Data' 
+# Path_Louis = C:\Users\louis\Downloads\EP_Project\Data\Clipped_data
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
@@ -155,7 +155,7 @@ for Band in All_Band08:
     
     # Update expected dimensions based on clipped_data
     
-    # bereken TUR:
+    # calculate TUR:
     A_p = 1602.93
     C_p = 0.19130
     Param = 'TUR'
@@ -165,7 +165,7 @@ for Band in All_Band08:
     SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
     PlotRaster(TUR_data, Param, date[0], True)
     
-    # bereken nu  SPM:
+    # calculate SPM:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
@@ -186,13 +186,13 @@ vector_path = currentdir + '/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
 nodata = 65535
 
-gdf = gpd.read_file(vector_path)
+gdf = gpd.read_file(vector_path) #read geometry of the shapefile?
 
-# calculating zonal statistics for every tif file in TUR folder using a for loop
+# calculating zonal statistics for every tif file in TUR folder using a for loop and the function defined above
 tif_folder_TUR = currentdir + '/TUR'
 tif_files_TUR = [f for f in os.listdir(tif_folder_TUR) if f.endswith('.tif')]
 
-for tif_file_TUR in tif_files_TUR:
+for tif_file_TUR in tif_files_TUR: #iterating over all the tif files in the TUR folder
     tif_path = os.path.join(tif_folder_TUR, tif_file_TUR)
     prefix = 'TUR'
     result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
@@ -202,15 +202,27 @@ for tif_file_TUR in tif_files_TUR:
 tif_folder_SPM = currentdir + '/SPM'
 tif_files_SPM = [f for f in os.listdir(tif_folder_SPM) if f.endswith('.tif')]
 
-for tif_file_SPM in tif_files_SPM:
+for tif_file_SPM in tif_files_SPM: #iterating over all the tif files in the SPM folder
     tif_path = os.path.join(tif_folder_SPM, tif_file_SPM)
     prefix = 'SPM'
     result = custom_zonal_stats(gdf, tif_path, stats, prefix, nodata)
     print(f"Zonal statistics for {tif_file_SPM}: {result}")
 
 
-# Create 2 list of dictionaries from zonal stats (1 for TUR, 1 for SPM)
-#TUR
+# defining a function to make a dictionary out of a list from the results of the zonal statistics (1 for each parameter)
+def dict_zonal_stats(results_list, prefix):
+    # Extract values for multiple keys into a dictionary
+    key_value_dict = {f'{prefix}{key}': [entry[f'{prefix}{key}'] for entry in results_list] for key in ['min', 'max', 'mean', 'std', 'median']}
+
+    # Print the resulting dictionary
+    print(key_value_dict)
+
+    # Create a DataFrame from the dictionary
+    df_to_add = pd.DataFrame(key_value_dict)
+
+    return df_to_add
+
+# list of dictionaries for TUR
 results_list_TUR = [
     {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 10.525367290375188, 'TURstd': 15.007504252561962, 'TURmedian': 6.715951318910258},
     {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 7.008311438179179, 'TURstd': 12.968962695433968, 'TURmedian': 2.7494138465189875},
@@ -221,7 +233,7 @@ results_list_TUR = [
     {'TURmin': 0.0, 'TURmax': 99.87598006237008, 'TURmean': 11.000622355221449, 'TURstd': 12.131615657528783, 'TURmedian': 9.928996513761469},
 ]
 
-#SPM
+# list of dictionaries for SPM
 results_list_SPM = [
     {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 11.41650600720615, 'SPMstd': 15.822073933103752, 'SPMmedian': 7.548003106837608},
     {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.377600785178969, 'SPMstd': 12.926593405598942, 'SPMmedian': 2.906743498154982},
@@ -230,28 +242,18 @@ results_list_SPM = [
     {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 7.373834421625951, 'SPMstd': 10.268240053375964, 'SPMmedian': 4.748489759406465},
     {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 20.919317537171043, 'SPMstd': 20.296808850522744, 'SPMmedian': 22.042569098998886},
     {'SPMmin': 0.0, 'SPMmax': 99.9266579096426, 'SPMmean': 12.173073488460528, 'SPMstd': 13.051696058022559, 'SPMmedian': 10.967214554476806},
-    ]
+]
 
-# Extract values for multiple keys into a dictionary
-#TUR
-key_value_dict_TUR = {key: [entry[key] for entry in results_list_TUR] for key in ['TURmin', 'TURmax', 'TURmean', 'TURstd', 'TURmedian']}
-
-#SPM
-key_value_dict_SPM = {key: [entry[key] for entry in results_list_SPM] for key in ['SPMmin', 'SPMmax', 'SPMmean', 'SPMstd', 'SPMmedian']}
-
-# Print the resulting dictionaries
-print(key_value_dict_TUR)
-print(key_value_dict_SPM)
-
-# Create DataFrames from the dictionaries
-df_to_add_TUR = pd.DataFrame(key_value_dict_TUR)
-df_to_add_SPM = pd.DataFrame(key_value_dict_SPM)
+# create new dataframes
+df_to_add_TUR = dict_zonal_stats(results_list_TUR, 'TUR')
+df_to_add_SPM = dict_zonal_stats(results_list_SPM, 'SPM')
 
 # Concatenate the existing DataFrame with the new DataFrames
 satellite = pd.concat([satellite, df_to_add_TUR, df_to_add_SPM], axis=1)
 
 # Print the resulting DataFrame
 print(satellite)
+
 
 ## Task 8
 
@@ -264,13 +266,13 @@ satellite['date'] = pd.to_datetime(satellite['date'])
 satellite['year'] = satellite['date'].dt.year
 
 # functie om de beide parameters te plotten over de jaren heen
-def plot_mean(satellite, column, label):
-    plt.plot(satellite.index, satellite[column], label=label)
-    plt.xlabel('Years')
+def plot_mean(satellite, column, label, color):
+    plt.plot(satellite['year'], satellite[column], label=label, color=color)
+    plt.xlabel('Year')
     plt.ylabel(f'Mean for {column}')
     plt.legend()
     plt.title(f'Mean for {column} over the years') 
-    plt.xticks(satellite['year'],
+    plt.xticks(satellite['year'])
     plt.show()
 
 # Plot voor Mean for SPM
