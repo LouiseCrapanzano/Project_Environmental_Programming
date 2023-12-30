@@ -265,17 +265,10 @@ satellite['date'] = pd.to_datetime(satellite['date'])
 # Haal het jaartal uit de 'date' kolom
 satellite['year'] = satellite['date'].dt.year
 
-<<<<<<< HEAD
-# functie om de beide parameters te plotten over de jaren heen
-def plot_mean(satellite, column, label, color):
-    plt.plot(satellite['year'], satellite[column], label=label, color=color)
-    plt.xlabel('Year')
-=======
 # function to plot both parameters over the years
 def plot_mean(satellite, column, label, color):
     plt.plot(satellite['year'], satellite[column], label=label, color=color)
     plt.xlabel('Years')
->>>>>>> d282cfd6e4c1c6d4b189218b48c975d169e0b417
     plt.ylabel(f'Mean for {column}')
     plt.legend()
     plt.title(f'Mean for {column} over the years') 
