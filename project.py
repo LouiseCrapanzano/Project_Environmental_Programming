@@ -5,7 +5,7 @@ Created on Tue Dec 12 10:53:46 2023
 @author: louis, livacke
 """
 
-## Task 2 
+# Task 2 
 
 # first import libraries
 import geopandas as gpd
