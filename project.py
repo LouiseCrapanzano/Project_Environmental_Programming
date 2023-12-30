@@ -263,18 +263,18 @@ satellite['date'] = pd.to_datetime(satellite['date'])
 # Haal het jaartal uit de 'date' kolom
 satellite['year'] = satellite['date'].dt.year
 
-# functie om de beide parameters te plotten over de jaren heen
-def plot_mean(satellite, column, label):
-    plt.plot(satellite.index, satellite[column], label=label)
+# function to plot both parameters over the years
+def plot_mean(satellite, column, label, color):
+    plt.plot(satellite['year'], satellite[column], label=label, color=color)
     plt.xlabel('Years')
     plt.ylabel(f'Mean for {column}')
     plt.legend()
     plt.title(f'Mean for {column} over the years') 
-    plt.xticks(satellite['year'],
+    plt.xticks(satellite['year'])
     plt.show()
 
-# Plot voor Mean for SPM
+# Plot for Mean for SPM
 plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
 
-# Plot voor Mean for TUR
+# Plot for Mean for TUR
 plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
