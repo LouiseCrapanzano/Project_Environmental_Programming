@@ -256,8 +256,8 @@ print(satellite)
 ## Task 8
 
 years = satellite['date']
-mean_SPM = satellite['mean_SPM']
-mean_TUR = satellite['mean_TUR']
+SPM_mean = satellite['SPMmean']
+TUR_mean = satellite['TURmean']
 
 satellite['date'] = pd.to_datetime(satellite['date'])
 # Haal het jaartal uit de 'date' kolom
@@ -273,7 +273,7 @@ def plot_mean(satellite, column, label):
     plt.show()
 
 # Plot voor Mean for SPM
-plot_mean(satellite, 'mean_SPM', 'Mean for SPM')
+plot_mean(satellite, 'SPMmean', 'Mean for SPM')
 
 # Plot voor Mean for TUR
-plot_mean(satellite, 'mean_TUR', 'Mean for TUR')
+plot_mean(satellite, 'TURmean', 'Mean for TUR')
