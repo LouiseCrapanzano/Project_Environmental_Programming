@@ -269,11 +269,12 @@ def plot_mean(satellite, column, label):
     plt.xlabel('Years')
     plt.ylabel(f'Mean for {column}')
     plt.legend()
-    plt.title(f'Mean for {column} over the years')
+    plt.title(f'Mean for {column} over the years') 
+    plt.xticks(satellite['year'],
     plt.show()
 
 # Plot voor Mean for SPM
-plot_mean(satellite, 'SPMmean', 'Mean for SPM')
+plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
 
 # Plot voor Mean for TUR
-plot_mean(satellite, 'TURmean', 'Mean for TUR')
+plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
