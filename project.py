@@ -214,18 +214,17 @@ satellite = gpd.GeoDataFrame(pd.concat([concatenated_geodataframes, concatenated
 # Print the final GeoDataFrame
 print(satellite)
 
-
-## Task 8
-
+# Task 8
+# Getting the columns out of the DataFrame
 years = satellite['date']
 SPM_mean = satellite['SPMmean']
 TUR_mean = satellite['TURmean']
 
 satellite['date'] = pd.to_datetime(satellite['date'])
-# Haal het jaartal uit de 'date' kolom
+# Getting the year out of the date
 satellite['year'] = satellite['date'].dt.year
 
-# function to plot both parameters over the years
+# Function to plot both parameters over the years
 def plot_mean(satellite, column, label, color):
     plt.plot(satellite['year'], satellite[column], label=label, color=color)
     plt.xlabel('Years')
@@ -235,8 +234,8 @@ def plot_mean(satellite, column, label, color):
     plt.xticks(satellite['year'])
     plt.show()
 
-# Plot for Mean for TUR
+# Plot Mean for TUR
 plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
 
-# Plot for Mean for SPM
+# Plot Mean for SPM
 plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
