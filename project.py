@@ -5,26 +5,26 @@ Created on Tue Dec 12 10:53:46 2023
 @author: louis, livacke
 """
 
-## Task 2 
 
-# First import libraries
-import geopandas as gpd
-import pandas as pd
-import zipfile
 # list of subfolders (1st column of the dataframe)
-import os
 import numpy as np
 import rasterio
 from rasterio.mask import mask as rmask
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import rasterstats
+import geopandas as gpd
+
+## Task 2
+# Import libraries
+import pandas as pd
+import zipfile
+import os
 
 # Ask user for directory where data is stored
 currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
 
 items_dir = []
-items = os.listdir(currentdir) # Code looks inside current directory/folder and searches all other directories
+items = os.listdir(currentdir) # Code looks inside current directory/folder and searches all other files and directories
 for item in items:
     path = os.path.join(currentdir, item)
     if item[-4:]=='.zip':      # Code to unzip zipfiles if present
@@ -33,13 +33,13 @@ for item in items:
         os.remove(path)
     if (os.path.isdir(os.path.join(currentdir, item))):
         
-        if(item[:3]=='R08'): # Only look for folders with filename that start with 'R08'
+        if(item[:3]=='R08'): # Only look for folders with name that starts with 'R08'
             items_R08=sorted(os.listdir(path))
-        if(item[:2]=='S2'):
+        if(item[:2]=='S2'):  # Only look for folders with name that starts with 'S2'
             items_dir.append(item)
             items_dir = sorted(items_dir)
     
-# Create a DataFrame and store lists inside the DataFrame 
+# Create a DataFrame and store lists inside that DataFrame 
 satellite = pd.DataFrame({"filename": items_dir, "Band08": items_R08})
 
 # Extract date from filename (3rd column DataFrame)
@@ -55,6 +55,7 @@ print(satellite)
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
+# Import libraries
 
 All_Band08 = list(satellite["Band08"])
 
@@ -163,14 +164,16 @@ for Band in All_Band08:
     PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
-# Define the function to calculate zonal statistics using rasterstats.zonal_stats
-def custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
-    # Calculate zonal statistics and convert the result to a GeoDataFrame
+#Import libraries
+import rasterstats
+
+# Define function to calculate zonal statistics and convert the result to a GeoDataFrame
+def Custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
     result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=Param, nodata=nodata, geojson_out=True)
     geostats = gpd.GeoDataFrame.from_features(result)
     return geostats
 
-# Define parameters
+# Define parameters and empty lists to store GeoDataFrames in
 Params = ['TUR','SPM']
 vector_path = currentdir + '/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
@@ -188,7 +191,7 @@ for Param in Params:
         tif_path = os.path.join(tif_folder, tif_file)
         
         # Calculate zonal statistics for the current parameter and TIFF file
-        geostats = custom_zonal_stats(vector_path, tif_path, stats, Param, nodata)
+        geostats = Custom_zonal_stats(vector_path, tif_path, stats, Param, nodata)
         
         # Select relevant columns from the result (excluding the first two columns)
         start_column_index = 2
@@ -212,7 +215,7 @@ satellite = gpd.GeoDataFrame(pd.concat([concatenated_geodataframes, concatenated
 print(satellite)
 
 ## Task 8
-# Getting the columns out of the DataFrame
+# Getting the columns out of the GeoDataFrame
 years = satellite['date']
 SPM_mean = satellite['SPMmean']
 TUR_mean = satellite['TURmean']
