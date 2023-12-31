@@ -20,9 +20,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import rasterstats
 
-# make dataframe 
-satellite = pd.DataFrame() #currently empty
-currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')  # interacting with user
+# ask user for directory where data is stored
+currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
 
 items_dir = []
 items = os.listdir(currentdir) # code looks inside current directory/folder and searches all other directories
@@ -40,13 +39,13 @@ for item in items:
             items_dir.append(item)
             items_dir = sorted(items_dir)
     
-# put list of filenames in dataframe 
-satellite = pd.DataFrame({"filename": (items_dir)})
+# create a dataframe and store lists inside the dataframe 
+satellite = pd.DataFrame({"filename": items_dir, "Band08": items_R08})
 
-satellite["Band08"]=items_R08
-# extract date from filename (2nd colomn dataframe)
+# extract date from filename (3rd column dataframe)
 satellite["date"]=satellite["filename"].str[11:19]
 
+# sort dataframe chronologically based on date
 satellite = satellite.sort_values("date")
 
 print(satellite)
