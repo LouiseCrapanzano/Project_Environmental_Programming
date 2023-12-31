@@ -5,21 +5,19 @@ Created on Tue Dec 12 10:53:46 2023
 @author: louis, livacke
 """
 
-
-# list of subfolders (1st column of the dataframe)
+# First import all the libraries necessary for the project
 import numpy as np
 import rasterio
 from rasterio.mask import mask as rmask
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import geopandas as gpd
-
-## Task 2
-# Import libraries
 import pandas as pd
 import zipfile
 import os
+import rasterstats
 
+## Task 2
 # Ask user for directory where data is stored
 currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
 
@@ -164,9 +162,6 @@ for Band in All_Band08:
     PlotRaster(SPM_data, Param, date[0], True)
     
 ## Task 6
-#Import libraries
-import rasterstats
-
 # Define function to calculate zonal statistics and convert the result to a GeoDataFrame
 def Custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
     result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=Param, nodata=nodata, geojson_out=True)
