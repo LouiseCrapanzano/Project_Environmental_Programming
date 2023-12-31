@@ -164,9 +164,9 @@ for Band in All_Band08:
     
 ## Task 6
 # Define the function to calculate zonal statistics using rasterstats.zonal_stats
-def custom_zonal_stats(vector_path, tif_path, stats, prefix, nodata):
+def custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
     # Calculate zonal statistics and convert the result to a GeoDataFrame
-    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=prefix, nodata=nodata, geojson_out=True)
+    result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=Param, nodata=nodata, geojson_out=True)
     geostats = gpd.GeoDataFrame.from_features(result)
     return geostats
 
