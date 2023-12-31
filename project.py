@@ -23,6 +23,13 @@ import rasterstats
 # Ask user for directory where data is stored
 currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
 
+# Validate input currentdir to check if it is a folder and not empty
+if not os.path.isdir(currentdir):
+    raise ValueError ("Currentdir is not a folder.")
+if not os.listdir(currentdir):
+    raise ValueError ("Currentdir is empty.")
+    currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
+
 items_dir = []
 items = os.listdir(currentdir) # Code looks inside current directory/folder and searches all other directories
 for item in items:
