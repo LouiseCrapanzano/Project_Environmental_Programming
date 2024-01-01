@@ -131,7 +131,11 @@ def PlotRaster(RasterData, Param, date, Display):
      
             # Add colorbar
             cbar = plt.colorbar()
-            cbar.set_label('Turbidity [FNU]')
+            
+            if Param == 'TUR':
+                cbar.set_label('Turbidity [FNU]')
+            elif Param == 'SPM':
+                cbar.set_label('Suspended Particular Matter concentration [gm\u207B\u00B3]', fontsize=8.8)
      
             plt.show()      
 
