@@ -16,6 +16,10 @@ import pandas as pd
 import zipfile
 import os
 import rasterstats
+from geopandas import read_file, GeoDataFrame
+from shapely.geometry import Point
+import random
+from numpy import random
 
 ## Task 2
 # Ask user for directory where data is stored
@@ -245,3 +249,111 @@ plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
 
 # Plot Mean for SPM
 plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
+
+
+
+## Task 9
+
+def generate_random_points_within_polygon(shapefile_path, num_points, output_shapefile, crs):
+
+    # Read the shapefile
+    gdf = read_file(shapefile_path)
+
+    # Extract the polygon geometry
+    polygon = gdf.geometry.iloc[0]
+
+    # Create random points within the polygon
+    random_points = []
+   
+    while len(random_points) < num_points:
+       
+        x = random.uniform(polygon.bounds[0], polygon.bounds[2])
+        y = random.uniform(polygon.bounds[1], polygon.bounds[3])
+
+        point = Point(x, y)
+       
+        if point.within(polygon):
+            random_points.append(point)
+           
+
+    # Create a GeoDataFrame for the random points
+    random_points_gdf = GeoDataFrame(geometry=random_points, crs=crs)
+
+    return random_points_gdf
+
+shapefile_path = currentdir + r'/reprojected_shapefile.shp'
+output_shapefile = currentdir + r'/random_points.shp'
+crs = 'EPSG:32631'
+num_points = 10
+
+random_points = generate_random_points_within_polygon(shapefile_path, num_points, output_shapefile, crs)
+
+# Save the GeoDataFrame as a new point shapefile
+random_points.to_file(output_shapefile)
+
+# Read the generated shapefile
+random_points_read = read_file(output_shapefile)
+
+def extract_pixel_values(shapefile_path, raster_path, band_number):
+    # Read the shapefile
+    gdf = gpd.read_file(shapefile_path)
+
+    # Open the raster file
+    with rasterio.open(raster_path) as src:
+        # Read the specified band
+        band = src.read(band_number)
+
+        #Create an affine transformation
+        transform = src.transform
+
+        # Extract pixel values corresponding to coordinates
+        pixel_values = []
+        for index, row in gdf.iterrows():
+            coordinates = row.geometry.xy
+            lon, lat = coordinates[0][0], coordinates[1][0]  # Assuming the geometry is a Point
+   
+            #Transform coordinates to pixel indices
+            col, row = ~transform * (lon, lat)
+
+            # Convert to integer values
+            col, row = int(col), int(row)
+           
+            # Make sure the coordinates are within the raster bounds
+            if 0 <= row < src.height and 0 <= col < src.width:
+                pixel_value = band[row, col]
+                pixel_values.append(pixel_value)
+            else:
+                pixel_values.append(None)  # or any other placeholder for out-of-bounds coordinates
+
+        # Add a new column to the GeoDataFrame with pixel values
+        gdf['pixel_values'] = pixel_values
+
+    return gdf
+
+# Provide the appropriate band_number, and shapefile_path
+band_number = 1
+output_shapefile = currentdir + r'/random_points.shp'
+
+# Dataframe collection
+dataframes_SPM = []
+dataframes_TUR = []
+
+# Loop through each parameter (TUR, SPM)
+for Param in Params:
+    tif_folder = os.path.join(currentdir, Param)
+    tif_files = sorted([f for f in os.listdir(tif_folder) if f.endswith('.tif')])
+    
+    # Loop through each TIFF file for the current parameter
+    for tif_file in tif_files:
+        tif_path = os.path.join(tif_folder, tif_file)
+        result = extract_pixel_values(output_shapefile, tif_path, band_number)
+
+        if Param == 'TUR':
+            dataframes_TUR.append(result)
+        elif Param == 'SPM':
+            dataframes_SPM.append(result)
+            
+final_dataframe_SPM = pd.concat(dataframes_SPM, ignore_index=True)
+final_dataframe_TUR = pd.concat(dataframes_TUR, ignore_index=True)
+
+print(final_dataframe_SPM, final_dataframe_TUR)
