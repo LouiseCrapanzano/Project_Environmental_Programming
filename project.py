@@ -56,8 +56,6 @@ satellite["date"]=satellite["filename"].str[11:19]
 # Sort DataFrame chronologically based on date
 satellite = satellite.sort_values("date")
 
-print(satellite)
-
 # Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
 # Path_Louis = C:/Users/louis/Downloads/EP_Project/Data/Clipped_data
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
