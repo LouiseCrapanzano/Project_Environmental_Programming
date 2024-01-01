@@ -18,7 +18,6 @@ import os
 import rasterstats
 from geopandas import read_file, GeoDataFrame
 from shapely.geometry import Point
-import random
 from numpy import random
 
 ## Task 2
@@ -353,7 +352,5 @@ for Param in Params:
         elif Param == 'SPM':
             dataframes_SPM.append(result)
             
-final_dataframe_SPM = pd.concat(dataframes_SPM, ignore_index=True)
-final_dataframe_TUR = pd.concat(dataframes_TUR, ignore_index=True)
-
-print(final_dataframe_SPM, final_dataframe_TUR)
+print(dataframes_TUR)
+print(dataframes_SPM)
