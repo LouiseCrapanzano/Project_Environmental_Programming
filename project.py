@@ -345,15 +345,13 @@ for Param in Params:
             dataframes_TUR.append(result)
         elif Param == 'SPM':
             dataframes_SPM.append(result)
-            
-print(dataframes_TUR)
-print(dataframes_SPM)
 
 ## Task 10
 def combine_and_plot(dataframes, title_keyword):
     # Combine the 'pixel_values' from all DataFrames into a single DataFrame
-    combined_df = pd.concat([df['pixel_values'] for df in dataframes], axis=1, keys=[f'DataFrame {i + 1}' for i in range(len(dataframes))])
-
+    satellite['year'] = satellite['date'].dt.year
+    year_list = list(satellite["year"])
+    combined_df = pd.concat([df['pixel_values'] for df in dataframes], axis=1, keys=[str(year_list[i]) for i in range(len(dataframes))])
     # Display the combined DataFrame
     print(combined_df)
 
