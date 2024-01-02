@@ -366,7 +366,9 @@ def combine_and_plot(dataframes, title_keyword):
         plt.show()
 
 # Example usage for TUR dataframes
+print('TUR')
 combine_and_plot(dataframes_TUR, title_keyword='TUR')
 
 # Example usage for SPM dataframes
+print('SPM')
 combine_and_plot(dataframes_SPM, title_keyword='SPM')
