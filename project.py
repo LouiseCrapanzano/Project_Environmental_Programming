@@ -31,10 +31,6 @@ if not os.listdir(currentdir):
     raise ValueError ("Currentdir is empty.")
     currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
 
-# Path_Liv = /Users/livacke/Library/CloudStorage/OneDrive-VrijeUniversiteitBrussel/3e Bachelor/Environmental Programming/Clipped_data
-# Path_Louis = C:/Users/louis/Downloads/EP_Project/Data/Clipped_data
-# Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
-
 items_dirS2 = []
 items = os.listdir(currentdir) # Code looks inside current directory/folder and searches all other files and directories
 for item in items:
