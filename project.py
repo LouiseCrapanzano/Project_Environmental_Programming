@@ -363,7 +363,7 @@ def combine_and_plot(dataframes, title_keyword):
         plt.plot(row, marker='o')
         plt.xlabel('DataFrames')
         plt.ylabel('Pixel Values')
-        plt.title(f'Pixel Values Across DataFrames {title_keyword} for Point {index + 1}')
+        plt.title(f'Pixel Values by year for {title_keyword} for Point {index + 1}')
         plt.show()
 
 # Example usage for TUR dataframes
