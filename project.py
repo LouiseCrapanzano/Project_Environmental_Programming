@@ -61,8 +61,6 @@ satellite = satellite.sort_values("date")
 # Path_Alex = /Users/alexsamyn/Library/CloudStorage/OneDrive-Gedeeldebibliotheken-VrijeUniversiteitBrussel/Liv Acke - Environmental Programming/Clipped_data
 
 ## Task 4 and Task 5
-# Import libraries
-
 All_Band08 = list(satellite["Band08"])
 
 # Calculating TUR and SPM
@@ -248,9 +246,7 @@ plot_mean(satellite, 'TURmean', 'Mean for TUR', color='red')
 plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
 
 
-
 ## Task 9
-
 def generate_random_points_within_polygon(shapefile_path, num_points, output_shapefile, crs):
 
     # Read the shapefile
@@ -352,3 +348,27 @@ for Param in Params:
             
 print(dataframes_TUR)
 print(dataframes_SPM)
+
+## Task 10
+def combine_and_plot(dataframes, title_keyword):
+    # Combine the 'pixel_values' from all DataFrames into a single DataFrame
+    combined_df = pd.concat([df['pixel_values'] for df in dataframes], axis=1, keys=[f'DataFrame {i + 1}' for i in range(len(dataframes))])
+
+    # Display the combined DataFrame
+    print(combined_df)
+
+    # Iterate over rows in the combined DataFrame
+    for index, row in combined_df.iterrows():
+        # Create a plot for each row
+        plt.figure(figsize=(10, 6))
+        plt.plot(row, marker='o')
+        plt.xlabel('DataFrames')
+        plt.ylabel('Pixel Values')
+        plt.title(f'Pixel Values Across DataFrames {title_keyword} for Point {index + 1}')
+        plt.show()
+
+# Example usage for SPM dataframes
+combine_and_plot(dataframes_SPM, title_keyword='SPM')
+
+# Example usage for TUR dataframes
+combine_and_plot(dataframes_TUR, title_keyword='TUR')
