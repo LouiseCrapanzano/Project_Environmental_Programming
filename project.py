@@ -287,9 +287,9 @@ random_points.to_file(output_shapefile)
 # Read the generated shapefile
 random_points_read = read_file(output_shapefile)
 
-def extract_pixel_values(shapefile_path, raster_path, band_number):
+def extract_pixel_values(output_shapefile, raster_path, band_number):
     # Read the shapefile
-    gdf = gpd.read_file(shapefile_path)
+    gdf = gpd.read_file(output_shapefile)
 
     # Open the raster file
     with rasterio.open(raster_path) as src:
@@ -360,15 +360,15 @@ def combine_and_plot(dataframes, title_keyword):
         # Create a plot for each row
         plt.figure(figsize=(10, 6))
         plt.plot(row, marker='o')
-        plt.xlabel('DataFrames')
-        plt.ylabel('Pixel Values')
-        plt.title(f'Pixel Values by year for {title_keyword} for Point {index + 1}')
+        plt.xlabel('Years')
+        plt.ylabel(title_keyword)
+        plt.title(f'{title_keyword} by year for Point {index + 1}')
         plt.show()
 
 # Example usage for TUR dataframes
 print('TUR')
-combine_and_plot(dataframes_TUR, title_keyword='TUR')
+combine_and_plot(dataframes_TUR, title_keyword='Turbidity')
 
 # Example usage for SPM dataframes
 print('SPM')
-combine_and_plot(dataframes_SPM, title_keyword='SPM')
+combine_and_plot(dataframes_SPM, title_keyword='Suspended Particular Matter concentration')
