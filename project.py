@@ -61,7 +61,7 @@ satellite["date"]=satellite["dir_name"].str[11:19]
 satellite = satellite.sort_values("date")
 
 
-## Task 4 and Task 5
+## Task 3 and Task 4
 All_Band08 = list(satellite["Band08"])
 
 # Calculating TUR and SPM
@@ -83,7 +83,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
         # Extract the geometry of the reprojected shapefile
         geometry = [reprojected_shapefile.geometry.values[0]]
             
-        # Clip GeoTIFF with shapefile
+        # Clip GeoTIFF with shapefile (Task 3)
         clipped_data, out_transform = rmask(rho, geometry, crop=True)
 
         # Update metadata
@@ -114,13 +114,27 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
     
     return RasterData, out_meta
 
-# Save data (task 5)
+## Task 5
+
+# Save data 
 def SaveRaster(RasterData, out_meta, currentdir, Param, date):    
     path_out = currentdir + f'/{Param}/{Param}_{date}.tif' # Path of where you want to save raster data
     with rasterio.open(fp=path_out, # outputpath_name
                   mode='w',**out_meta) as dst:
                   dst.write(RasterData, 1)
+                  
+# Make the folders where RasterData is saved, if not created already (Task 5)
+def CreateFolder(currentdir, Param):
+    path_create = os.path.join(currentdir,Param)
+    if not os.path.exists(path_create):
+        os.makedirs(path_create) 
     
+CreateFolder(currentdir, 'TUR')
+CreateFolder(currentdir, 'SPM')
+
+    
+## Task 8
+
 def PlotRaster(RasterData, Param, date, Display):
     if Display:
             title = Param + ' ' + date
@@ -138,15 +152,6 @@ def PlotRaster(RasterData, Param, date, Display):
                 cbar.set_label('Suspended Particular Matter concentration [gm\u207B\u00B3]', fontsize=8.8)
      
             plt.show()      
-
-# Make the folders where RasterData is saved, if not created already (Task 5)
-def CreateFolder(currentdir, Param):
-    path_create = os.path.join(currentdir,Param)
-    if not os.path.exists(path_create):
-        os.makedirs(path_create) 
-    
-CreateFolder(currentdir, 'TUR')
-CreateFolder(currentdir, 'SPM')
 
 
 for Band in All_Band08:
