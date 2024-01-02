@@ -173,7 +173,9 @@ for Band in All_Band08:
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
     PlotRaster(SPM_data, Param, date[0], True)
     
+    
 ## Task 6
+
 # Define function to calculate zonal statistics and convert the result to a GeoDataFrame
 def Custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
     result = rasterstats.zonal_stats(vectors=vector_path, raster=tif_path, stats=stats, prefix=Param, nodata=nodata, geojson_out=True)
@@ -221,7 +223,9 @@ satellite = gpd.GeoDataFrame(pd.concat([concatenated_geodataframes, concatenated
 # Print the final GeoDataFrame
 print(satellite)
 
-## Task 8
+
+## Task 7
+
 # Getting the columns out of the GeoDataFrame
 years = satellite['date']
 SPM_mean = satellite['SPMmean']
@@ -249,6 +253,7 @@ plot_mean(satellite, 'SPMmean', 'Mean for SPM', color='blue')
 
 
 ## Task 9
+
 def generate_random_points_within_polygon(shapefile_path, num_points, output_shapefile, crs):
 
     # Read the shapefile
