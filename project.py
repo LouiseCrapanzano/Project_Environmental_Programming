@@ -2,7 +2,7 @@
 """
 Created on Tue Dec 12 10:53:46 2023
 
-@author: louis, livacke
+@author: louis, livacke, alexsamyn, roxana
 """
 
 # First import all the libraries necessary for the project
