@@ -23,7 +23,6 @@ from numpy import random
 ## Task 2
 # Ask user for directory where data is stored
 currentdir = input('What is the path to your unzipped file (Clipped data) on your computer?\n')
-
 # Validate input currentdir to check if it is a folder and not empty
 if not os.path.isdir(currentdir):
     raise ValueError ("Currentdir is not a folder.")
@@ -54,7 +53,7 @@ satellite = pd.DataFrame({"dir_name": items_dirS2, "Band08": items_R08})
 satellite["date"]=satellite["dir_name"].str[11:19]
 
 # Sort DataFrame chronologically based on date
-satellite = satellite.sort_values("ABC")
+satellite = satellite.sort_values("date")
 
 
 ## Task 3 and Task 4
@@ -78,6 +77,7 @@ def CalcRaster(A_p, C_p, Param, currentdir, Band, date):
         
         # Extract the geometry of the reprojected shapefile
         geometry = [reprojected_shapefile.geometry.values[0]]
+
             
         # Clip GeoTIFF with shapefile (Task 3)
         clipped_data, out_transform = rmask(rho, geometry, crop=True)
