@@ -54,22 +54,22 @@ satellite = pd.DataFrame({"dir_name": items_dirS2, "Band08": items_R08})
 satellite["date"]=satellite["dir_name"].str[11:19]
 
 # Sort DataFrame chronologically based on date
-satellite = satellite.sort_values("date")
+satellite = satellite.sort_values("ABC")
 
 
 ## Task 3 and Task 4
 All_Band08 = list(satellite["Band08"])
 
 # Calculating TUR and SPM
-def CalcRaster(A_p, C_p, Param, currentdir, Band, date, Display=False):
-    path_shp = currentdir + '/reprojected_shapefile.shp'
+def CalcRaster(A_p, C_p, Param, currentdir, Band, date):
+    path_shp = currentdir + r'/scheldt_clip.shp'
 
     shapefile = gpd.read_file(path_shp)
     
     with rasterio.open(Band) as rho:
         
         # Define the target CRS you want to reproject to
-        target_crs = 'EPSG:32631'  
+        target_crs = rho.crs #'EPSG:32631'
 
         # Reproject the GeoDataFrame to the target CRS
         reprojected_shapefile = shapefile.to_crs(target_crs)
@@ -151,7 +151,7 @@ def PlotRaster(RasterData, Param, date, Display):
 
 
 for Band in All_Band08:
-    path_folder = currentdir + '/R08_Bands/'
+    path_folder = currentdir + r'/R08_Bands/'
     path = os.path.join(path_folder,Band)
     
     # Update expected dimensions based on clipped_data
@@ -161,7 +161,7 @@ for Band in All_Band08:
     C_p = 0.19130
     Param = 'TUR'
     date = list(satellite.loc[satellite.Band08 == Band, 'date']) # find date of folder
-    TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True) # calculate and save TUR data
+    TUR_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0]) # calculate and save TUR data
     SaveRaster(TUR_data, out_meta, currentdir, Param, date[0])
     PlotRaster(TUR_data, Param, date[0], True)
     
@@ -169,7 +169,7 @@ for Band in All_Band08:
     A_p = 1801.52
     C_p = 0.19130
     Param = 'SPM'
-    SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0],True)
+    SPM_data, out_meta = CalcRaster(A_p, C_p, Param, currentdir, path, date[0])
     SaveRaster(SPM_data, out_meta, currentdir, Param, date[0])
     PlotRaster(SPM_data, Param, date[0], True)
     
@@ -184,7 +184,7 @@ def Custom_zonal_stats(vector_path, tif_path, stats, Param, nodata):
 
 # Define parameters and empty lists to store GeoDataFrames in
 Params = ['TUR','SPM']
-vector_path = currentdir + '/reprojected_shapefile.shp'
+vector_path = currentdir + r'/reprojected_shapefile.shp'
 stats = ['min', 'max', 'mean', 'std', 'median']
 nodata = 65535
 geodataframes_list_TUR = []
@@ -283,7 +283,7 @@ def generate_random_points_within_polygon(shapefile_path, num_points, output_sha
 
 shapefile_path = currentdir + r'/reprojected_shapefile.shp'
 output_shapefile = currentdir + r'/random_points.shp'
-crs = 'EPSG:32631'
+crs = 'EPSG:32631' 
 num_points = 10
 
 random_points = generate_random_points_within_polygon(shapefile_path, num_points, output_shapefile, crs)
@@ -303,7 +303,7 @@ def extract_pixel_values(output_shapefile, raster_path, band_number):
         # Read the specified band
         band = src.read(band_number)
 
-        #Create an affine transformation
+        #Create a transformation
         transform = src.transform
 
         # Extract pixel values corresponding to coordinates
@@ -311,7 +311,6 @@ def extract_pixel_values(output_shapefile, raster_path, band_number):
         for index, row in gdf.iterrows():
             coordinates = row.geometry.xy
             lon, lat = coordinates[0][0], coordinates[1][0]  # Assuming the geometry is a Point
-   
             #Transform coordinates to pixel indices
             col, row = ~transform * (lon, lat)
 
